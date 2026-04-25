@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { Transaction } from "../types/transaction";
+import api from "./api";
 
 const API_URL = "http://localhost:8000";
 
@@ -71,15 +72,12 @@ export const rejectTransaction = async (
 export const createTransaction = async (payload: {
   userId: string;
   eventId: string;
+  usedPoints?: number;
   items: {
     ticketTypeId: string;
     quantity: number;
   }[];
-}): Promise<Transaction> => {
-  const response = await axios.post<ApiResponse<Transaction>>(
-    `${API_URL}/transactions`,
-    payload
-  );
-
-  return response.data.data;
+}) => {
+  const response = await api.post("/transactions", payload);
+  return response.data;
 };

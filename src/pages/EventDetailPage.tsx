@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -20,6 +20,9 @@ const EventDetailPage = () => {
     {}
   );
   const [submitting, setSubmitting] = useState(false);
+  const [usedPoints, setUsedPoints] = useState(0);
+  const [transactionError, setTransactionError] = useState("");
+  const [transactionSuccess, setTransactionSuccess] = useState("");
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -64,45 +67,91 @@ const EventDetailPage = () => {
     });
   };
 
-const handleGetTickets = async () => {
-  if (!event) return;
+  const selectedItems = useMemo(() => {
+    if (!event?.ticketTypes) return [];
 
-  if (!user?.id) {
-    alert("You must login first");
-    navigate("/login");
-    return;
-  }
+    return Object.entries(selectedTickets)
+      .filter(([, quantity]) => quantity > 0)
+      .map(([ticketTypeId, quantity]) => {
+        const ticket = event.ticketTypes.find((t) => t.id === ticketTypeId);
 
-  const items = Object.entries(selectedTickets)
-    .filter(([, quantity]) => quantity > 0)
-    .map(([ticketTypeId, quantity]) => ({
-      ticketTypeId,
-      quantity,
-    }));
+        return {
+          ticketTypeId,
+          quantity,
+          ticket,
+        };
+      })
+      .filter((item) => item.ticket);
+  }, [selectedTickets, event]);
 
-  if (items.length === 0) {
-    alert("Please select at least one ticket");
-    return;
-  }
+  const subtotal = useMemo(() => {
+    return selectedItems.reduce((sum, item) => {
+      return sum + ((item.ticket?.price || 0) * item.quantity);
+    }, 0);
+  }, [selectedItems]);
 
-  try {
-    setSubmitting(true);
+  const availablePoints = Number(user?.points || 0);
+  const maxUsablePoints = Math.min(availablePoints, subtotal);
+  const safeUsedPoints = Math.min(Math.max(usedPoints, 0), maxUsablePoints);
+  const finalTotal = Math.max(subtotal - safeUsedPoints, 0);
 
-    await createTransaction({
-      userId: user.id,
-      eventId: event.id,
-      items,
-    });
+  const handleGetTickets = async () => {
+    if (!event) return;
 
-    alert("Transaction created successfully");
-    navigate("/transactions");
-  } catch (err: any) {
-    console.error(err);
-    alert(err?.response?.data?.message || "Failed to create transaction");
-  } finally {
-    setSubmitting(false);
-  }
-};
+    if (!user?.id) {
+      alert("You must login first");
+      navigate("/login");
+      return;
+    }
+
+    const items = Object.entries(selectedTickets)
+      .filter(([, quantity]) => quantity > 0)
+      .map(([ticketTypeId, quantity]) => ({
+        ticketTypeId,
+        quantity,
+      }));
+
+    if (items.length === 0) {
+      alert("Please select at least one ticket");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setTransactionError("");
+      setTransactionSuccess("");
+
+      const response = await createTransaction({
+        userId: user.id,
+        eventId: event.id,
+        usedPoints: safeUsedPoints,
+        items,
+      });
+
+      setTransactionSuccess(
+        response?.message || "Transaction created successfully"
+      );
+
+      const updatedUser = {
+        ...user,
+        points: Math.max((user?.points || 0) - safeUsedPoints, 0),
+      };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      setTimeout(() => {
+        navigate("/transactions");
+      }, 1200);
+    } catch (err: any) {
+      console.error(err);
+      setTransactionError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "Failed to create transaction"
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (loading) return <p style={{ padding: 24 }}>Loading event detail...</p>;
   if (error) return <p style={{ padding: 24 }}>{error}</p>;
@@ -188,14 +237,76 @@ const handleGetTickets = async () => {
               })}
             </div>
 
-            <div style={{ marginTop: 20 }}>
-              <button
-                style={{ width: "100%", padding: "14px 16px" }}
-                onClick={handleGetTickets}
-                disabled={submitting}
-              >
-                {submitting ? "Processing..." : "Get Tickets"}
-              </button>
+            <div className="premium-card" style={{ marginTop: 24 }}>
+              <div className="section-heading">
+                <div>
+                  <p className="section-kicker">CHECKOUT</p>
+                  <h2>Order Summary</h2>
+                </div>
+              </div>
+
+              <div className="premium-input-group">
+                <label>Available Points</label>
+                <input
+                  type="text"
+                  value={availablePoints.toLocaleString("id-ID")}
+                  disabled
+                />
+              </div>
+
+              <div className="premium-input-group">
+                <label>Use Points</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={maxUsablePoints}
+                  value={usedPoints}
+                  onChange={(e) => setUsedPoints(Number(e.target.value) || 0)}
+                  placeholder="Enter points to use"
+                />
+                <small className="muted">
+                  Maximum usable points: {maxUsablePoints.toLocaleString("id-ID")}
+                </small>
+              </div>
+
+              <div className="checkout-summary-box">
+                <div className="checkout-summary-row">
+                  <span>Subtotal</span>
+                  <strong>IDR {subtotal.toLocaleString("id-ID")}</strong>
+                </div>
+
+                <div className="checkout-summary-row">
+                  <span>Points Discount</span>
+                  <strong>- IDR {safeUsedPoints.toLocaleString("id-ID")}</strong>
+                </div>
+
+                <div className="checkout-summary-row total">
+                  <span>Final Total</span>
+                  <strong>IDR {finalTotal.toLocaleString("id-ID")}</strong>
+                </div>
+              </div>
+
+              {transactionError && (
+                <div className="error-box" style={{ marginTop: 16 }}>
+                  {transactionError}
+                </div>
+              )}
+
+              {transactionSuccess && (
+                <div className="success-box" style={{ marginTop: 16 }}>
+                  {transactionSuccess}
+                </div>
+              )}
+
+              <div style={{ marginTop: 20 }}>
+                <button
+                  style={{ width: "100%", padding: "14px 16px" }}
+                  onClick={handleGetTickets}
+                  disabled={submitting}
+                >
+                  {submitting ? "Processing..." : "Get Tickets"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

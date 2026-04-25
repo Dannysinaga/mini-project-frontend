@@ -3614,4 +3614,58 @@ button:hover {
     align-items: flex-start;
   }
 }
+* {
+  max-width: 100%;
+  box-sizing: border-box;
+}
 
+body {
+  overflow-x: hidden;
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  width: 100%;
+}
+
+/* Batasi lebar card grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+/* Batasi lebar hero section */
+.hero-section, .home-hero {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.checkout-summary-box {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.08);
+}
+
+.checkout-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  color: #334155;
+}
+
+.checkout-summary-row.total {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.checkout-summary-row.total strong {
+  color: #191970;
+  font-size: 18px;
+}
