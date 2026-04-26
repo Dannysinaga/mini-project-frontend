@@ -62,28 +62,71 @@ const TransactionHistoryPage = () => {
   return (
     <div className="page-container">
       <Navbar />
-      
 
-      <h1 className="section-title">Transaction History</h1>
-
-      {loading && <p>Loading transactions...</p>}
-      {error && <p>{error}</p>}
-      {!loading && !error && transactions.length === 0 && (
-        <p>No transactions found</p>
-      )}
-
-      {!loading && !error && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {transactions.map((transaction) => (
-            <TransactionCard
-              key={transaction.id}
-              transaction={transaction}
-              onUploadProof={handleUploadProof}
-            />
-          ))}
-          <Footer/>
+      <div className="container" style={{ paddingTop: 28, paddingBottom: 40 }}>
+        <div className="organizer-hero">
+          <span
+            className="badge"
+            style={{
+              background: "rgba(255,255,255,0.18)",
+              color: "white",
+            }}
+          >
+            MY TRANSACTIONS
+          </span>
+          <h1>Track your orders and payment progress</h1>
+          <p>
+            Review your purchased tickets, monitor payment status, and upload
+            proof of payment before the deadline.
+          </p>
         </div>
-      )}
+
+        {loading && (
+          <div className="premium-card" style={{ marginTop: 24 }}>
+            <p className="muted" style={{ margin: 0 }}>
+              Loading transactions...
+            </p>
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="error-box" style={{ marginTop: 24 }}>
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && transactions.length === 0 && (
+          <div className="premium-card transaction-empty-state" style={{ marginTop: 24 }}>
+            <h2>No transactions yet</h2>
+            <p className="muted">
+              Your ticket purchases will appear here after you complete a
+              checkout.
+            </p>
+          </div>
+        )}
+
+        {!loading && !error && transactions.length > 0 && (
+          <div
+            className="transaction-history-list"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 18,
+              marginTop: 24,
+            }}
+          >
+            {transactions.map((transaction) => (
+              <TransactionCard
+                key={transaction.id}
+                transaction={transaction}
+                onUploadProof={handleUploadProof}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Footer />
     </div>
   );
 };

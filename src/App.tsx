@@ -14,6 +14,9 @@ import ProfilePage from "./pages/ProfilePage";
 import OrganizerDashboardPage from "./pages/OrganizerDashboardPage";
 import PointsPage from "./pages/PointsPage";
 import "./App.css";
+import OrganizerAttendeesPage from "./pages/OrganizerAttendeesPage";
+import OrganizerVoucherPage from "./pages/OrganizerVoucherPage";
+
 
 function App() {
   return (
@@ -27,10 +30,12 @@ function App() {
       <Route path="/points" element={<PointsPage />} />
       <Route path="/events/:id" element={<EventDetailPage />} />
       <Route path="/transactions" element={<TransactionHistoryPage />} />
+      <Route path="/organizer/event/:eventId/attendees" element={<OrganizerAttendeesPage />} />
       <Route
         path="/organizer/dashboard"
         element={<OrganizerDashboardPage />}
       />
+      <Route path="/organizer/vouchers" element={<OrganizerVoucherPage />} />u7n\
       <Route
         path="/organizer/pending-transactions"
         element={<OrganizerPendingTransactionsPage />}

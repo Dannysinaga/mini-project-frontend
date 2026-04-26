@@ -5,7 +5,9 @@ import Navbar from "../components/Navbar";
 import { getEvents } from "../services/event.service";
 import type { Event } from "../types/event";
 
+
 const HomePage = () => {
+
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");

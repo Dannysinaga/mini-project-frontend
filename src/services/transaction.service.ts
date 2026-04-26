@@ -1,8 +1,5 @@
-import axios from "axios";
 import type { Transaction } from "../types/transaction";
 import api from "./api";
-
-const API_URL = "http://localhost:8000";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -13,12 +10,9 @@ interface ApiResponse<T> {
 export const getTransactionHistory = async (
   userId: string
 ): Promise<Transaction[]> => {
-  const response = await axios.get<ApiResponse<Transaction[]>>(
-    `${API_URL}/transactions`,
-    {
-      params: { userId },
-    }
-  );
+  const response = await api.get<ApiResponse<Transaction[]>>("/transactions", {
+    params: { userId },
+  });
 
   return response.data.data;
 };
@@ -27,8 +21,8 @@ export const uploadPaymentProof = async (
   transactionId: string,
   paymentProofUrl: string
 ): Promise<Transaction> => {
-  const response = await axios.patch<ApiResponse<Transaction>>(
-    `${API_URL}/transactions/${transactionId}/upload-proof`,
+  const response = await api.patch<ApiResponse<Transaction>>(
+    `/transactions/${transactionId}/upload-proof`,
     { paymentProofUrl }
   );
 
@@ -38,8 +32,8 @@ export const uploadPaymentProof = async (
 export const getPendingTransactions = async (
   organizerId: string
 ): Promise<Transaction[]> => {
-  const response = await axios.get<ApiResponse<Transaction[]>>(
-    `${API_URL}/transactions/pending/list`,
+  const response = await api.get<ApiResponse<Transaction[]>>(
+    "/transactions/pending/list",
     {
       params: { organizerId },
     }
@@ -51,8 +45,8 @@ export const getPendingTransactions = async (
 export const approveTransaction = async (
   transactionId: string
 ): Promise<Transaction> => {
-  const response = await axios.patch<ApiResponse<Transaction>>(
-    `${API_URL}/transactions/${transactionId}/approve`
+  const response = await api.patch<ApiResponse<Transaction>>(
+    `/transactions/${transactionId}/approve`
   );
 
   return response.data.data;
@@ -62,17 +56,20 @@ export const rejectTransaction = async (
   transactionId: string,
   rejectionReason: string
 ): Promise<Transaction> => {
-  const response = await axios.patch<ApiResponse<Transaction>>(
-    `${API_URL}/transactions/${transactionId}/reject`,
+  const response = await api.patch<ApiResponse<Transaction>>(
+    `/transactions/${transactionId}/reject`,
     { rejectionReason }
   );
 
   return response.data.data;
 };
+
 export const createTransaction = async (payload: {
   userId: string;
   eventId: string;
   usedPoints?: number;
+  couponCode?: string;
+  voucherCode?: string;
   items: {
     ticketTypeId: string;
     quantity: number;

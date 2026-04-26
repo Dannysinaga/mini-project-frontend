@@ -13,6 +13,7 @@ const OrganizerManageEventsPage = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
 
   const fetchEvents = async () => {
     try {
@@ -21,6 +22,9 @@ const OrganizerManageEventsPage = () => {
         setLoading(false);
         return;
       }
+
+      setLoading(true);
+      setError("");
 
       const data = await getOrganizerEvents(user.id);
       setEvents(data);
@@ -41,116 +45,139 @@ const OrganizerManageEventsPage = () => {
     if (!confirmed) return;
 
     try {
+      setDeletingId(eventId);
       await deleteEvent(eventId, user.id);
-      alert("Event deleted successfully");
-      fetchEvents();
+      setEvents((prev) => prev.filter((event) => event.id !== eventId));
     } catch (err) {
       console.error(err);
       alert("Failed to delete event");
+    } finally {
+      setDeletingId("");
     }
   };
 
-  
-    return (
-  <div className="page-container">
-    <Navbar />
+  return (
+    <div className="page-container">
+      <Navbar />
 
-    <div className="organizer-hero">
-      <span
-        className="badge"
-        style={{ background: "rgba(255,255,255,0.18)", color: "white" }}
-      >
-        ORGANIZER PANEL
-      </span>
-      <h1>Manage your events professionally</h1>
-      <p>
-        Create new experiences, update ticket offerings, and handle your event
-        operations in one dashboard.
-      </p>
-    </div>
-
-    <div className="manage-header-row">
-        <div>
-          <span className="badge">ORGANIZER PANEL</span>
-          <h1 className="section-title" style={{ marginTop: 12 }}>
-            Manage My Events
-          </h1>
-          <p className="muted page-description">
-            Edit, preview, or delete events you have already created.
+      <div className="container" style={{ paddingTop: 24, paddingBottom: 40 }}>
+        <div className="organizer-hero">
+          <span
+            className="badge"
+            style={{ background: "rgba(255,255,255,0.18)", color: "white" }}
+          >
+            ORGANIZER PANEL
+          </span>
+          <h1>Manage your events professionally</h1>
+          <p>
+            Create new experiences, update ticket offerings, and handle your event
+            operations in one dashboard.
           </p>
         </div>
 
-        <div className="manage-actions">
-          <button onClick={() => navigate("/organizer/create-event")}>
-            + Create Event
-          </button>
+        <div className="manage-header-row" style={{ marginTop: 24 }}>
+          <div>
+            <p className="section-kicker" style={{ marginBottom: 8 }}>
+              MANAGE EVENTS
+            </p>
+            <h2 className="section-title" style={{ marginTop: 0 }}>
+              Manage My Events
+            </h2>
+            <p className="muted page-description">
+              Edit, preview, or delete events you have already created.
+            </p>
+          </div>
+
+          <div className="manage-actions">
+            <button onClick={() => navigate("/organizer/create-event")}>
+              + Create Event
+            </button>
+          </div>
         </div>
-      </div>
 
-      {loading && <div className="loading-box">Loading organizer events...</div>}
-      {error && <div className="error-box">{error}</div>}
+        {loading && (
+          <div className="premium-card" style={{ marginTop: 24 }}>
+            <p className="muted" style={{ margin: 0 }}>
+              Loading organizer events...
+            </p>
+          </div>
+        )}
 
-      {!loading && !error && events.length === 0 && (
-        <div className="empty-state">
-          <h3>No events found</h3>
-          <p className="muted">
-            You haven’t created any events yet. Start by creating your first event.
-          </p>
-          <button onClick={() => navigate("/organizer/create-event")}>
-            Create First Event
-          </button>
-        </div>
-      )}
+        {error && !loading && (
+          <div className="error-box" style={{ marginTop: 24 }}>
+            {error}
+          </div>
+        )}
 
-      {!loading && !error && events.length > 0 && (
-        <div className="card-grid">
-          {events.map((event) => (
-            <div className="event-card" key={event.id}>
-              <img
-                className="image-thumb"
-                src={
-                  event.bannerUrl ||
-                  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1200&auto=format&fit=crop"
-                }
-                alt={event.name}
-                onError={(e) => {
-                  e.currentTarget.src =
-                    "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1200&auto=format&fit=crop";
-                }}
-              />
+        {!loading && !error && events.length === 0 && (
+          <div className="premium-card transaction-empty-state" style={{ marginTop: 24 }}>
+            <h2>No events found</h2>
+            <p className="muted">
+              You haven’t created any events yet. Start by creating your first event.
+            </p>
+            <button
+              style={{ marginTop: 16 }}
+              onClick={() => navigate("/organizer/create-event")}
+            >
+              Create First Event
+            </button>
+          </div>
+        )}
 
-              <div className="event-card-content">
-                <span className="badge">{event.category}</span>
-                <h3>{event.name}</h3>
+        {!loading && !error && events.length > 0 && (
+          <div className="card-grid" style={{ marginTop: 24 }}>
+            {events.map((event) => (
+              <div className="event-card" key={event.id}>
+                <img
+                  className="image-thumb"
+                  src={
+                    event.bannerUrl ||
+                    "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1200&auto=format&fit=crop"
+                  }
+                  alt={event.name}
+                  onError={(e) => {
+                    e.currentTarget.src =
+                      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1200&auto=format&fit=crop";
+                  }}
+                />
 
-                <div>
-                  <span className="info-chip">{event.location}</span>
-                  <span className="info-chip">
-                    {new Date(event.startDate).toLocaleDateString()}
-                  </span>
-                </div>
+                <div className="event-card-content">
+                  <span className="badge">{event.category}</span>
+                  <h3>{event.name}</h3>
 
-                <div className="action-row">
-                  <button onClick={() => navigate(`/organizer/edit-event/${event.id}`)}>
-                    Edit
-                  </button>
+                  <div className="manage-event-meta-row">
+                    <span className="info-chip">{event.location}</span>
+                    <span className="info-chip">
+                      {new Date(event.startDate).toLocaleDateString()}
+                    </span>
+                    <span className="info-chip">
+                      {event.status || "PUBLISHED"}
+                    </span>
+                  </div>
 
-                  <button
-                    className="button-secondary"
-                    onClick={() => handleDelete(event.id)}
-                  >
-                    Delete
-                  </button>
+                  <div className="action-row">
+                    <button onClick={() => navigate(`/organizer/edit-event/${event.id}`)}>
+                      Edit
+                    </button>
 
-                  <Link to={`/events/${event.id}`}>
-                    <button className="button-secondary">Preview</button>
-                  </Link>
+                    <button
+                      className="button-secondary"
+                      onClick={() => handleDelete(event.id)}
+                      disabled={deletingId === event.id}
+                    >
+                      {deletingId === event.id ? "Deleting..." : "Delete"}
+                    </button>
+
+                    <Link to={`/events/${event.id}`}>
+                      <button className="button-secondary">Preview</button>
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
 
       <Footer />
     </div>

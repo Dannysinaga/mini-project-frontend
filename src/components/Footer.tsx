@@ -57,8 +57,6 @@ const Footer = () => {
             <div>
               <h4>Organizer</h4>
               <Link to="/organizer/dashboard">Dashboard</Link>
-              <Link to="/organizer/create-event">Create Event</Link>
-              <Link to="/organizer/manage-events">My Events</Link>
               <Link to="/organizer/pending-transactions">Pending</Link>
             </div>
             <div>

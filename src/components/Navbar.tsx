@@ -58,10 +58,10 @@ const Navbar = () => {
           </Link>
         </div>
 
-        <div className="lux-navbar-center">
+        <div className="lux-navbar-right">
           <nav className="lux-nav-menu">
             <Link className={isActive("/") ? "lux-nav-link active" : "lux-nav-link"} to="/">
-              <span>Home</span>
+                <span>Home</span>
             </Link>
 
             {user?.role === "CUSTOMER" && (
@@ -106,28 +106,7 @@ const Navbar = () => {
                   <span>Dashboard</span>
                 </Link>
 
-                <Link
-                  className={
-                    isActive("/organizer/create-event")
-                      ? "lux-nav-link active"
-                      : "lux-nav-link"
-                  }
-                  to="/organizer/create-event"
-                >
-                  <span>Create Event</span>
-                </Link>
-
-                <Link
-                  className={
-                    isActive("/organizer/manage-events")
-                      ? "lux-nav-link active"
-                      : "lux-nav-link"
-                  }
-                  to="/organizer/manage-events"
-                >
-                  <span>My Events</span>
-                </Link>
-
+                
                 <Link
                   className={
                     isActive("/organizer/pending-transactions")
@@ -149,9 +128,7 @@ const Navbar = () => {
               <Link to="/login" className="lux-login-btn">
                 Login
               </Link>
-              <Link to="/register" className="lux-register-btn">
-                Register
-              </Link>
+              
             </div>
           ) : (
             <div className="lux-user-dropdown" ref={dropdownRef}>
