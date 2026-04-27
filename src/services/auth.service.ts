@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8000";
+const API_URL = "https://mini-project-backend-tau.vercel.app";
 
 export type LoginPayload = {
   email: string;

@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { Event } from "../types/event";
 
-const API_URL = "http://localhost:8000";
+const API_URL = "https://mini-project-backend-tau.vercel.app";
 
 interface GetEventsParams {
   search?: string;
